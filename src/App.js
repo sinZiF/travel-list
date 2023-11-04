@@ -6,12 +6,16 @@ export default function App() {
   function handleAddItems(item) {
     setItems([...items, item])
   }
+  function handleDelete(item) {
+    if (!items) return;
+    setItems((items) => items.filter(cur => cur.id !== item.id))
+  }
 
   return (
     <>
       <Logo />
-      <Form items={items} onAddItems={handleAddItems}/>
-      <PackingList />
+      <Form onAddItems={handleAddItems}/>
+      <PackingList items={items} onDelete={handleDelete}/>
     </>
   );
 }
@@ -22,7 +26,7 @@ function Logo() {
   </div>)
 }
 
-function Form({items, onAddItems}) {
+function Form({onAddItems}) {
   const [quantity, setQuantity] = useState(1);
   const [text, setText] = useState('')
 
@@ -64,10 +68,24 @@ function Form({items, onAddItems}) {
   )
 }
 
-function PackingList() {
-  return (
-    <div>
+function PackingList({items, onDelete}) {
+  function Item() {
+    if (!items) return;
+    return(
+      items.map(item =>
+        <li key={item.id}>
+          <input type="checkbox"></input>
+          <span style={item.done ? {textDecoration: 'line-through'} : {}}>{item.quantity} {item.text}</span>
+          <button onClick={() => {onDelete(item)}}>❌</button>
+        </li>)
+    )
+  }
 
+  return (
+    <div className="list">
+      <ul>
+        <Item />
+      </ul>
     </div>
   )
 }
