@@ -7,15 +7,17 @@ export default function App() {
     setItems([...items, item])
   }
   function handleDelete(item) {
-    if (!items) return;
-    setItems((items) => items.filter(cur => cur.id !== item.id))
+    setItems((items) => items.filter(cur => cur.id !== item))
+  }
+  function handleChecked(item) {
+    setItems((items) => items.map(cur => cur.id === item ? {...cur, done: !cur.done} : cur));
   }
 
   return (
     <>
       <Logo />
       <Form onAddItems={handleAddItems}/>
-      <PackingList items={items} onDelete={handleDelete}/>
+      <PackingList items={items} onDelete={handleDelete} onChecked={handleChecked}/>
     </>
   );
 }
@@ -68,15 +70,15 @@ function Form({onAddItems}) {
   )
 }
 
-function PackingList({items, onDelete}) {
+function PackingList({items, onDelete, onChecked}) {
   function Item() {
     if (!items) return;
     return(
       items.map(item =>
         <li key={item.id}>
-          <input type="checkbox"></input>
+          <input onChange={() => onChecked(item.id)} type="checkbox" value={item.done} checked={item.done}></input>
           <span style={item.done ? {textDecoration: 'line-through'} : {}}>{item.quantity} {item.text}</span>
-          <button onClick={() => {onDelete(item)}}>❌</button>
+          <button onClick={() => {onDelete(item.id)}}>❌</button>
         </li>)
     )
   }
