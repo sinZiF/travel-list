@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import {useState } from "react";
 
 export default function App() {
   const [items, setItems] = useState([]);
@@ -12,12 +12,14 @@ export default function App() {
   function handleChecked(item) {
     setItems((items) => items.map(cur => cur.id === item ? {...cur, done: !cur.done} : cur));
   }
-
+  function handleClearLisr() {
+    setItems([])
+  }
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={handleAddItems}/>
-      <PackingList items={items} onDelete={handleDelete} onChecked={handleChecked}/>
+      <PackingList items={items} onDelete={handleDelete} onChecked={handleChecked} onClearList={handleClearLisr} />
       <Footer items={items} />
     </div>
   );
@@ -71,16 +73,22 @@ function Form({onAddItems}) {
   )
 }
 
-function PackingList({items, onDelete, onChecked}) {
-  const [filterElements, setFilterElements] = useState([
-    'sort by input order',
-    'sort by description',
-    'sort by packed status'
-  ]);
+function PackingList({items, onDelete, onChecked, onClearList}) {
+  const [sortBy, setSortBy] = useState('input')
+  let sortedItems;
+
+  if (sortBy === 'input') sortedItems = items;
+  if (sortBy === 'description') sortedItems = items.slice().sort(
+    (a,b) => a.text.localeCompare(b.text)
+  )
+  if (sortBy === 'packed') sortedItems = items.slice().sort(
+    (a,b) => Number(a.done) - Number(b.done)
+  )
+
   function Item() {
     if (!items) return;
     return(
-      items.map(item =>
+      sortedItems.map(item =>
         <li key={item.id}>
           <input onChange={() => onChecked(item.id)} type="checkbox" value={item.done} checked={item.done}></input>
           <span style={item.done ? {textDecoration: 'line-through'} : {}}>{item.quantity} {item.text}</span>
@@ -96,10 +104,12 @@ function PackingList({items, onDelete, onChecked}) {
       </ul>
       <div>
       {/* filter section */}
-        <select>
-          {filterElements.map((el, id) => <option key={id} value={el}>{el}</option>)}
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+        <option value='input'>sort by input order</option>
+        <option value='description'>sort by description</option>
+        <option value='packed'>sort by packed status</option>
         </select>
-        <button>clear list</button>
+        <button onClick={onClearList}>clear list</button>
       </div>
     </div>
   )
