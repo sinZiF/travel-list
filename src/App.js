@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 export default function App() {
   const [items, setItems] = useState([]);
@@ -14,11 +14,12 @@ export default function App() {
   }
 
   return (
-    <>
+    <div className="app">
       <Logo />
       <Form onAddItems={handleAddItems}/>
       <PackingList items={items} onDelete={handleDelete} onChecked={handleChecked}/>
-    </>
+      <Footer items={items} />
+    </div>
   );
 }
 
@@ -71,6 +72,11 @@ function Form({onAddItems}) {
 }
 
 function PackingList({items, onDelete, onChecked}) {
+  const [filterElements, setFilterElements] = useState([
+    'sort by input order',
+    'sort by description',
+    'sort by packed status'
+  ]);
   function Item() {
     if (!items) return;
     return(
@@ -88,6 +94,30 @@ function PackingList({items, onDelete, onChecked}) {
       <ul>
         <Item />
       </ul>
+      <div>
+      {/* filter section */}
+        <select>
+          {filterElements.map((el, id) => <option key={id} value={el}>{el}</option>)}
+        </select>
+        <button>clear list</button>
+      </div>
     </div>
+  )
+}
+
+function Footer({items}) {
+  const numItems = items.length;
+  if(!numItems) {
+    return(
+      <p className="stats">Start edding some items to packing list 💫</p>
+    )
+  }
+  const totalDone = items.reduce((acc, cur) => acc + (cur.done ? 1 : 0),  0);
+  const alreadyProcent = Math.floor((100 / numItems) * totalDone);
+
+  return(
+    <footer className="stats">
+        {alreadyProcent !== 100 ? `💼 You have ${numItems} items on your list, and you already packed ${totalDone} ${alreadyProcent || 0}% ` : 'You got everything! Ready to go 🧑‍✈️'}
+    </footer>
   )
 }
